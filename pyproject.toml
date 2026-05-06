@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ds-trainer"
+version = "0.1.0"
+description = "Fully offline CLI tool to practice SQL, Python, statistics, ML, and algorithms for DS technical interviews"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+keywords = ["data-science", "interview-prep", "cli", "sql", "machine-learning"]
+dependencies = [
+    "rich>=13.0",
+    "pandas>=1.5",
+    "numpy>=1.23",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-cov>=4.0"]
+
+[project.scripts]
+ds-trainer = "ds_trainer.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ds_trainer*"]
