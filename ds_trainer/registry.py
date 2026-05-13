@@ -7,24 +7,47 @@ from ds_trainer.models import Question
 
 
 def load_all() -> list[Question]:
-    from ds_trainer.domains import (
-        algorithms,
-        case_studies,
-        ml,
-        probability,
-        python_pandas,
-        sql,
-        statistics,
-    )
-    return (
-        sql.QUESTIONS
-        + python_pandas.QUESTIONS
-        + statistics.QUESTIONS
-        + ml.QUESTIONS
-        + algorithms.QUESTIONS
-        + case_studies.QUESTIONS
-        + probability.QUESTIONS
-    )
+    import sqlite3
+    import json
+    import os
+    from ds_trainer.models import Question, Domain, Difficulty, ExerciseType
+
+    db_path = os.path.join(os.path.dirname(__file__), "questions.db")
+    if not os.path.exists(db_path):
+        return []
+
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM questions")
+    rows = c.fetchall()
+    conn.close()
+
+    questions = []
+    for row in rows:
+        q = Question(
+            id=row["id"],
+            domain=Domain(row["domain"]),
+            difficulty=Difficulty(row["difficulty"]),
+            exercise_type=ExerciseType(row["exercise_type"]),
+            prompt=row["prompt"],
+            explanation=row["explanation"],
+            hints=json.loads(row["hints"]) if row["hints"] else [],
+            tags=json.loads(row["tags"]) if row["tags"] else [],
+            choices=json.loads(row["choices"]) if row["choices"] else None,
+            answer_index=row["answer_index"],
+            code_template=row["code_template"],
+            test_cases=json.loads(row["test_cases"]) if row["test_cases"] else None,
+            model_answer=row["model_answer"],
+            schema_ddl=row["schema_ddl"],
+            seed_data=row["seed_data"],
+            expected_query=row["expected_query"],
+            project_spec=row["project_spec"],
+            dataset_generator=row["dataset_generator"]
+        )
+        questions.append(q)
+
+    return questions
 
 
 def filter_questions(
