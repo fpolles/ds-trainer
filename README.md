@@ -44,7 +44,9 @@ Then navigate to `http://127.0.0.1:8000` in your browser.
 From the web UI, you can:
 - **Configure Training Sessions**: Select your domain, difficulty, and question types.
 - **Interactive Practice**: Write code and SQL with syntax highlighting, and instantly grade your solutions against the test cases.
-- **Add New Questions**: Click "Add Question" in the top right to open the creation form. The form will securely evaluate your question's logic before adding it directly to the SQLite database (`ds_trainer/questions.db`). IDs are generated automatically!
+- **Database Management**: From the bottom of the Setup View, you can access tools to manage the database:
+  - **Add Question**: Opens a form to securely evaluate and add new custom questions directly to the SQLite database (`ds_trainer/questions.db`). IDs are generated automatically!
+  - **Reset Database**: Wipes all custom questions and safely restores the database back to its original core question set.
 
 ---
 
@@ -180,7 +182,7 @@ Python 3.10+ required (uses `match/case` throughout).
 
 The easiest way to add new questions is through the **Visual Web App**:
 1. Run `uv run python web/main.py` and open `http://127.0.0.1:8000`.
-2. Click **Add Question** in the top right corner.
+2. In the Database Management section at the bottom of the setup screen, click **Add Question**.
 3. Fill out the fields. The Question ID will be automatically generated.
 4. Click **Test Question**. This runs your model answer against your test cases (or schema) to ensure it is valid.
 5. Once the test passes, click **Add to Database** to save it to `ds_trainer/questions.db`.
