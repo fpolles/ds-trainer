@@ -23,8 +23,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load questions into memory
-QUESTIONS = {q.id: q for q in load_all()}
+def get_questions_dict():
+    return {q.id: q for q in load_all()}
 
 class StartRequest(BaseModel):
     domain: str = "all"
@@ -38,9 +38,10 @@ class EvaluateRequest(BaseModel):
 
 @app.get("/api/config")
 def get_config():
-    domains = list(set(q.domain.value for q in QUESTIONS.values()))
-    difficulties = list(set(q.difficulty.value for q in QUESTIONS.values()))
-    types = list(set(q.exercise_type.value for q in QUESTIONS.values()))
+    questions = get_questions_dict()
+    domains = list(set(q.domain.value for q in questions.values()))
+    difficulties = list(set(q.difficulty.value for q in questions.values()))
+    types = list(set(q.exercise_type.value for q in questions.values()))
     
     # ensure "all" is available
     return {
@@ -51,7 +52,8 @@ def get_config():
 
 @app.post("/api/start")
 def start_session(req: StartRequest):
-    qs = filter_questions(list(QUESTIONS.values()), req.domain, req.difficulty, req.exercise_type)
+    questions = get_questions_dict()
+    qs = filter_questions(list(questions.values()), req.domain, req.difficulty, req.exercise_type)
     sampled = sample_questions(qs, req.count, shuffle=True)
     
     # Strip answers for the client
@@ -78,7 +80,8 @@ def start_session(req: StartRequest):
 
 @app.post("/api/evaluate")
 def evaluate(req: EvaluateRequest):
-    q = QUESTIONS.get(req.question_id)
+    questions = get_questions_dict()
+    q = questions.get(req.question_id)
     if not q:
         raise HTTPException(status_code=404, detail="Question not found")
         
