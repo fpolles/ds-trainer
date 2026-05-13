@@ -30,6 +30,24 @@ ds-trainer train --type fill_in_code --domain python
 
 ---
 
+## Visual Web App
+
+You can also practice and manage questions using the interactive visual web application.
+
+```bash
+# Start the FastAPI web server
+uv run python web/main.py
+```
+
+Then navigate to `http://127.0.0.1:8000` in your browser. 
+
+From the web UI, you can:
+- **Configure Training Sessions**: Select your domain, difficulty, and question types.
+- **Interactive Practice**: Write code and SQL with syntax highlighting, and instantly grade your solutions against the test cases.
+- **Add New Questions**: Click "Add Question" in the top right to open the creation form. The form will securely evaluate your question's logic before adding it directly to the SQLite database (`ds_trainer/questions.db`). IDs are generated automatically!
+
+---
+
 ## What it covers
 
 Companies that hire data scientists typically test these areas:
@@ -138,7 +156,7 @@ ds_trainer/
 - **Sandboxed code execution** — `eval_code` uses `exec()` with a whitelist of ~30 safe builtins (no `open`, no `__import__`). A `threading.Thread` with a 10-second timeout prevents infinite loops.
 - **In-memory SQLite** — `eval_sql` runs both the user query and the model answer against a fresh `sqlite3.connect(":memory:")` and compares result sets as `frozenset[tuple]` (order-independent).
 - **Marker dicts** — pandas DataFrames and sklearn arrays in test cases are stored as serialisable dicts (`{"__pandas_df__": True, "data": {...}}`) and resolved to real objects just before evaluation.
-- **Plain Python question banks** — questions are `Question(...)` literals in domain files, not YAML/JSON; they diff cleanly and are syntax-highlighted in any editor.
+- **SQLite Database** — questions are stored in `ds_trainer/questions.db` making it fully portable and easy to query or extend.
 
 ---
 
@@ -160,11 +178,12 @@ Python 3.10+ required (uses `match/case` throughout).
 
 ## Contributing questions
 
-1. Open the relevant domain file under `ds_trainer/domains/`.
-2. Add a `Question(...)` literal to the `QUESTIONS` list.
-3. Follow the ID convention: `{domain_abbrev}_{difficulty_abbrev}_{serial}` — e.g. `sql_m_007`.
-4. Run `ds-trainer stats` to confirm the new question appears.
-5. Run `pytest tests/` — the domain smoke tests will verify the model answer passes.
+The easiest way to add new questions is through the **Visual Web App**:
+1. Run `uv run python web/main.py` and open `http://127.0.0.1:8000`.
+2. Click **Add Question** in the top right corner.
+3. Fill out the fields. The Question ID will be automatically generated.
+4. Click **Test Question**. This runs your model answer against your test cases (or schema) to ensure it is valid.
+5. Once the test passes, click **Add to Database** to save it to `ds_trainer/questions.db`.
 
 For **FILL_IN_CODE** questions, always include `test_cases` so the answer can be auto-evaluated. The `model_answer` field is shown to the user after they submit and is also used by the test suite to verify correctness.
 
