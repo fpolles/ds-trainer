@@ -180,12 +180,27 @@ Python 3.10+ required (uses `match/case` throughout).
 
 ## Contributing questions
 
-The easiest way to add new questions is through the **Visual Web App**:
+There are two ways to add custom questions to your test prep environment.
+
+### 1. Via the Visual Web App (Database)
+The easiest way to add new questions dynamically is through the visual web application, which persists data directly to `ds_trainer/questions.db`.
 1. Run `uv run python web/main.py` and open `http://127.0.0.1:8000`.
 2. In the Database Management section at the bottom of the setup screen, click **Add Question**.
-3. Fill out the fields. The Question ID will be automatically generated.
-4. Click **Test Question**. This runs your model answer against your test cases (or schema) to ensure it is valid.
-5. Once the test passes, click **Add to Database** to save it to `ds_trainer/questions.db`.
+3. Fill out the form fields. The system adapts based on the exercise type and automatically generates your Question ID!
+4. Click **Test Question**. This securely evaluates your model answer against your test cases (or SQL schema) to guarantee the question works.
+5. Once the test passes, click **Add to Database**.
+
+### 2. Via the CLI Tool (Python Files)
+If you prefer managing questions as code, you can define them in the core python files. Note: Questions added here can be populated to the web app's database later by using the "Reset Database" utility.
+1. Open the relevant domain file under `ds_trainer/domains/` (e.g., `sql.py`, `ml.py`).
+2. Add a `Question(...)` literal to the `QUESTIONS` list.
+3. Follow the ID convention: `{domain_abbrev}_{difficulty_abbrev}_{serial}` — e.g., `sql_m_007`.
+4. Run `ds-trainer stats` to confirm the new question appears.
+5. Run `pytest tests/` — the domain smoke tests will verify that your model answer passes successfully.
+
+---
+
+### Important Guidelines
 
 For **FILL_IN_CODE** questions, always include `test_cases` so the answer can be auto-evaluated. The `model_answer` field is shown to the user after they submit and is also used by the test suite to verify correctness.
 
