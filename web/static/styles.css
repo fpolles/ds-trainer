@@ -237,6 +237,17 @@ textarea {
     background: rgba(255, 255, 255, 0.15);
 }
 
+.danger-btn {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.danger-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: white;
+}
+
 .small-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.875rem;

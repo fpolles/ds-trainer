@@ -27,6 +27,7 @@ const views = {
 // Nav Elements
 const navAddQuestionBtn = document.getElementById('nav-add-question-btn');
 const navHomeBtn = document.getElementById('nav-home-btn');
+const navResetDbBtn = document.getElementById('nav-reset-db-btn');
 
 // Create View Elements
 const cqDomain = document.getElementById('cq-domain');
@@ -90,6 +91,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         navHomeBtn.classList.add('hidden');
         navAddQuestionBtn.classList.remove('hidden');
     });
+    
+    navResetDbBtn.addEventListener('click', async () => {
+        if (confirm("Are you sure you want to reset the database? This will delete ALL custom questions and restore the core defaults. This cannot be undone!")) {
+            navResetDbBtn.disabled = true;
+            navResetDbBtn.textContent = "Resetting...";
+            try {
+                const res = await fetch(`${API_BASE}/reset_database`, { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message);
+                    await fetchConfig(); // Refresh configurations in case domains/difficulties changed
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (e) {
+                alert('Failed to connect to server.');
+            }
+            navResetDbBtn.disabled = false;
+            navResetDbBtn.textContent = "Reset Database";
+        }
+    });
+
     cqType.addEventListener('change', renderDynamicFields);
     testQBtn.addEventListener('click', testQuestion);
     addQBtn.addEventListener('click', addQuestion);

@@ -234,6 +234,49 @@ def add_question(req: AddQuestionRequest):
     except Exception as e:
         return {"success": False, "message": str(e)}
 
+@app.post("/api/reset_database")
+def reset_database():
+    import sqlite3
+    from ds_trainer.domains import (
+        algorithms, case_studies, ml, probability, python_pandas, sql, statistics
+    )
+    
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ds_trainer", "questions.db")
+    
+    questions = (
+        sql.QUESTIONS
+        + python_pandas.QUESTIONS
+        + statistics.QUESTIONS
+        + ml.QUESTIONS
+        + algorithms.QUESTIONS
+        + case_studies.QUESTIONS
+        + probability.QUESTIONS
+    )
+    
+    try:
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute('DELETE FROM questions')
+        
+        for q in questions:
+            c.execute('''
+                INSERT INTO questions VALUES (
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                )
+            ''', (
+                q.id, q.domain.value, q.difficulty.value, q.exercise_type.value, q.prompt, q.explanation,
+                json.dumps(q.hints) if q.hints else "[]", json.dumps(q.tags) if q.tags else "[]",
+                json.dumps(q.choices) if q.choices else None, q.answer_index, q.code_template,
+                json.dumps(q.test_cases) if q.test_cases else None, q.model_answer, q.schema_ddl,
+                q.seed_data, q.expected_query, q.project_spec, q.dataset_generator
+            ))
+        
+        conn.commit()
+        conn.close()
+        return {"success": True, "message": f"Successfully restored {len(questions)} core questions."}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
 # Mount static files
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 os.makedirs(static_dir, exist_ok=True)
