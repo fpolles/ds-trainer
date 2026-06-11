@@ -89,7 +89,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             navResetDbBtn.disabled = true;
             navResetDbBtn.textContent = "Resetting...";
             try {
-                const res = await fetch(`${API_BASE}/reset_database`, { method: 'POST' });
+                const res = await fetch(`${API_BASE}/reset_database`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ confirm: true })
+                });
                 const result = await res.json();
                 if (result.success) {
                     alert(result.message);
