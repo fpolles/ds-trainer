@@ -5,6 +5,18 @@ Practice data scientist technical assessments — fully offline.
 ---
 
 ## Quick start
+You can either use UV or pip to set up the project for both the CLI and WebApp.
+
+For UV use the following:
+```bash
+# 1. Sync the project using UV. This also creates a virtual environment.
+uv sync
+
+# 2. Run the CLI or WebApp
+ds-trainer train
+# OR
+uv run python web/main.py
+```
 
 ```bash
 # 1. Create and activate a virtual environment
@@ -27,6 +39,26 @@ ds-trainer train --type fill_in_code --domain python
 > python -m ds_trainer train
 > ```
 > Note: the dependencies (`rich`, `pandas`, `numpy`) must still be installed for this to work.
+
+---
+
+## Visual Web App
+
+You can also practice and manage questions using the interactive visual web application.
+
+```bash
+# Start the FastAPI web server
+uv run python web/main.py
+```
+
+Then navigate to `http://127.0.0.1:8000` in your browser. 
+
+From the web UI, you can:
+- **Configure Training Sessions**: Select your domain, difficulty, and question types.
+- **Interactive Practice**: Write code and SQL with syntax highlighting, and instantly grade your solutions against the test cases.
+- **Database Management**: From the bottom of the Setup View, you can access tools to manage the database:
+  - **Add Question**: Opens a form to securely evaluate and add new custom questions directly to the SQLite database (`ds_trainer/questions.db`). IDs are generated automatically!
+  - **Reset Database**: Wipes all custom questions and safely restores the database back to its original core question set.
 
 ---
 
@@ -138,7 +170,7 @@ ds_trainer/
 - **Sandboxed code execution** — `eval_code` uses `exec()` with a whitelist of ~30 safe builtins (no `open`, no `__import__`). A `threading.Thread` with a 10-second timeout prevents infinite loops.
 - **In-memory SQLite** — `eval_sql` runs both the user query and the model answer against a fresh `sqlite3.connect(":memory:")` and compares result sets as `frozenset[tuple]` (order-independent).
 - **Marker dicts** — pandas DataFrames and sklearn arrays in test cases are stored as serialisable dicts (`{"__pandas_df__": True, "data": {...}}`) and resolved to real objects just before evaluation.
-- **Plain Python question banks** — questions are `Question(...)` literals in domain files, not YAML/JSON; they diff cleanly and are syntax-highlighted in any editor.
+- **SQLite Database** — questions are stored in `ds_trainer/questions.db` making it fully portable and easy to query or extend.
 
 ---
 
@@ -160,11 +192,27 @@ Python 3.10+ required (uses `match/case` throughout).
 
 ## Contributing questions
 
-1. Open the relevant domain file under `ds_trainer/domains/`.
+There are two ways to add custom questions to your test prep environment.
+
+### 1. Via the Visual Web App (Database)
+The easiest way to add new questions dynamically is through the visual web application, which persists data directly to `ds_trainer/questions.db`.
+1. Run `uv run python web/main.py` and open `http://127.0.0.1:8000`.
+2. In the Database Management section at the bottom of the setup screen, click **Add Question**.
+3. Fill out the form fields. The system adapts based on the exercise type and automatically generates your Question ID!
+4. Click **Test Question**. This securely evaluates your model answer against your test cases (or SQL schema) to guarantee the question works.
+5. Once the test passes, click **Add to Database**.
+
+### 2. Via the CLI Tool (Python Files)
+If you prefer managing questions as code, you can define them in the core python files. Note: Questions added here can be populated to the web app's database later by using the "Reset Database" utility.
+1. Open the relevant domain file under `ds_trainer/domains/` (e.g., `sql.py`, `ml.py`).
 2. Add a `Question(...)` literal to the `QUESTIONS` list.
-3. Follow the ID convention: `{domain_abbrev}_{difficulty_abbrev}_{serial}` — e.g. `sql_m_007`.
+3. Follow the ID convention: `{domain_abbrev}_{difficulty_abbrev}_{serial}` — e.g., `sql_m_007`.
 4. Run `ds-trainer stats` to confirm the new question appears.
-5. Run `pytest tests/` — the domain smoke tests will verify the model answer passes.
+5. Run `pytest tests/` — the domain smoke tests will verify that your model answer passes successfully.
+
+---
+
+### Important Guidelines
 
 For **FILL_IN_CODE** questions, always include `test_cases` so the answer can be auto-evaluated. The `model_answer` field is shown to the user after they submit and is also used by the test suite to verify correctness.
 

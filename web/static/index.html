@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS Trainer Visual</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Marked for Markdown to HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Highlight.js for Code Formatting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-elements">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+    
+    <div class="app-container">
+        <header class="app-header">
+            <h1><span class="gradient-text">DS</span> Trainer</h1>
+            <p class="subtitle">Master Data Science Technical Interviews</p>
+        </header>
+
+        <main id="main-content">
+            <!-- Setup View -->
+            <div id="setup-view" class="view glass-panel active">
+                <h2>Configure Session</h2>
+                
+                <div class="form-group">
+                    <label for="domain-select">Domain</label>
+                    <select id="domain-select">
+                        <option value="all">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="difficulty-select">Difficulty</label>
+                    <select id="difficulty-select">
+                        <option value="all">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="type-select">Exercise Type</label>
+                    <select id="type-select">
+                        <option value="all">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="count-input">Number of Questions</label>
+                    <input type="number" id="count-input" value="5" min="1" max="50">
+                </div>
+
+                <button id="start-btn" class="btn primary-btn">
+                    Start Training <span class="btn-icon">→</span>
+                </button>
+
+                <div class="management-section">
+                    <h3 class="management-title">Database Management</h3>
+                    <div class="management-buttons">
+                        <button id="nav-add-question-btn" class="btn secondary-btn">
+                            Add Question
+                        </button>
+                        <button id="nav-reset-db-btn" class="btn danger-btn">
+                            Reset Database
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training View -->
+            <div id="training-view" class="view">
+                <div class="progress-container glass-panel">
+                    <div class="progress-text">Question <span id="current-q-num">1</span> of <span id="total-q-num">5</span></div>
+                    <div class="progress-bar-bg">
+                        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                    </div>
+                </div>
+
+                <div class="question-container glass-panel">
+                    <div class="question-header">
+                        <span id="q-domain" class="badge domain-badge">Domain</span>
+                        <span id="q-difficulty" class="badge difficulty-badge">Difficulty</span>
+                        <span id="q-type" class="badge type-badge">Type</span>
+                    </div>
+
+                    <div id="q-prompt" class="markdown-body">
+                        <!-- Markdown content injected here -->
+                    </div>
+
+                    <div id="q-hints-container" class="hints-section hidden">
+                        <button id="show-hint-btn" class="btn secondary-btn small-btn">Show Hint</button>
+                        <div id="hints-list" class="hints-list"></div>
+                    </div>
+
+                    <div id="input-area" class="input-area">
+                        <!-- Dynamic inputs based on exercise type -->
+                    </div>
+
+                    <div class="actions-area">
+                        <button id="submit-btn" class="btn primary-btn">Submit Answer</button>
+                        <button id="skip-btn" class="btn secondary-btn">Skip Question</button>
+                    </div>
+
+                    <!-- Evaluation Result -->
+                    <div id="eval-result" class="eval-result hidden">
+                        <div class="result-header">
+                            <h3 id="result-title">Result</h3>
+                        </div>
+                        <div id="result-message" class="result-message markdown-body"></div>
+                        
+                        <div id="model-answer-section" class="model-answer-section hidden">
+                            <h4>Model Answer / Explanation</h4>
+                            <div id="model-answer-content" class="markdown-body"></div>
+                        </div>
+
+                        <button id="next-btn" class="btn primary-btn btn-full-width mt-4">Next Question</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary View -->
+            <div id="summary-view" class="view glass-panel">
+                <h2>Session Complete!</h2>
+                <div class="score-card">
+                    <div class="score-circle">
+                        <span id="final-score">0%</span>
+                    </div>
+                    <p id="score-text">You got <span id="correct-count">0</span> out of <span id="total-count">0</span> correct.</p>
+                </div>
+                
+                <div class="summary-actions">
+                    <button id="restart-btn" class="btn primary-btn">Train Again</button>
+                </div>
+            </div>
+
+            <!-- Create Question View -->
+            <div id="create-view" class="view glass-panel">
+                <h2>Add New Question</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cq-domain">Domain</label>
+                        <select id="cq-domain"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cq-difficulty">Difficulty</label>
+                        <select id="cq-difficulty"></select>
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="cq-type">Exercise Type</label>
+                        <select id="cq-type"></select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cq-prompt">Prompt (Markdown)</label>
+                    <textarea id="cq-prompt" placeholder="Write your question here..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cq-explanation">Explanation (Markdown)</label>
+                    <textarea id="cq-explanation" placeholder="Provide an explanation for the answer..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="cq-hints">Hints (Comma Separated)</label>
+                    <input type="text" id="cq-hints" placeholder="Hint 1, Hint 2, ...">
+                </div>
+
+                <div class="form-group">
+                    <label for="cq-tags">Tags (Comma Separated)</label>
+                    <input type="text" id="cq-tags" placeholder="tag1, tag2, ...">
+                </div>
+
+                <!-- Dynamic Type Specific Fields -->
+                <div id="dynamic-fields-container">
+                    <!-- Injected by JS based on Exercise Type -->
+                </div>
+
+                <div class="actions-area mt-4">
+                    <button id="test-q-btn" class="btn secondary-btn">Test Question</button>
+                    <button id="add-q-btn" class="btn primary-btn" disabled>Add to Database</button>
+                    <button id="nav-home-btn" class="btn secondary-btn">Cancel</button>
+                </div>
+                
+                <div id="test-result" class="eval-result hidden mt-4">
+                    <div class="result-header">
+                        <h3 id="test-result-title">Test Result</h3>
+                    </div>
+                    <div id="test-result-message" class="result-message"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
