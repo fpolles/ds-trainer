@@ -18,9 +18,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 def get_questions_dict():
@@ -35,6 +35,9 @@ class StartRequest(BaseModel):
 class EvaluateRequest(BaseModel):
     question_id: str
     user_answer: str
+
+class ResetRequest(BaseModel):
+    confirm: bool = False
 
 class AddQuestionRequest(BaseModel):
     id: str | None = None
@@ -235,7 +238,10 @@ def add_question(req: AddQuestionRequest):
         return {"success": False, "message": str(e)}
 
 @app.post("/api/reset_database")
-def reset_database():
+def reset_database(req: ResetRequest):
+    if not req.confirm:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Must send {\"confirm\": true} to reset the database.")
     import sqlite3
     from ds_trainer.domains import (
         algorithms, case_studies, ml, probability, python_pandas, sql, statistics
